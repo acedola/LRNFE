@@ -3,8 +3,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* app/globals.css */
+/* Estilos para Leaflet */
+@import 'leaflet/dist/leaflet.css';
 
+.leaflet-container {
+  width: 100vw;
+  height: 100vh;
+}
 /* Fuentes y otros estilos base */
+
 :root {
   --color-primary-green: #388E3C; /* Un verde más oscuro */
   --color-secondary-green: #689F38; /* Un verde intermedio */

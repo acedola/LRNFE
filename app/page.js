@@ -1,27 +1,27 @@
 // app/page.js
-import Navbar from '../components/Navbar';
+
 import Hero from '../components/Hero';
 import About from '../components/About';
 import Varieties from '../components/Varieties';
 import Products from '../components/Products';
 import Gallery from '../components/Gallery';
 import Contact from '../components/Contact';
+import MapComponent from'../components/MapComponent'
 
 // Si agregas testimonios y ubicación, impórtalos aquí
 
 export default function HomePage() {
   return (
     <>
-      <Navbar />
+      
       <main>
         <Hero />
-        <About />
         <Varieties />
         <Products />
+        <About />
         <Gallery />
-        {/* Aquí irían Testimonios y Ubicación si los implementas */}
         <Contact />
-        
+        <MapComponent />
       </main>
       {/* Puedes añadir un footer aquí */}
       <footer style={{
