@@ -104,7 +104,7 @@ function Hero() {
           justify-content: center;
           min-height: 100vh;
           overflow: hidden;
-          padding-top: 80px;
+          padding-top: 0px;
         }
 
         .hero-background-image {

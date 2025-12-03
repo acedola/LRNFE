@@ -1,7 +1,7 @@
-// components/Navbar.jsx - VERSIÓN CORREGIDA Y COMPLETA
+// components/Navbar.jsx
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 
 const navLinks = [
@@ -14,258 +14,109 @@ const navLinks = [
 ];
 
 export default function Navbar() {
-  const navbarRef = useRef(null);
-
-  useEffect(() => {
-    // SOLUCIÓN INFALIBLE
-    const forcePadding = () => {
-      const navbar = navbarRef.current;
-      if (!navbar) return;
-      
-      const height = navbar.offsetHeight;
-      console.log('Altura del navbar:', height);
-      
-      // Método 1: Directamente al body
-      document.body.style.paddingTop = `${height}px`;
-      
-      // Método 2: Usar CSS importante
-      const style = document.createElement('style');
-      style.id = 'navbar-padding-fix';
-      style.innerHTML = `
-        body {
-          padding-top: ${height}px !important;
-        }
-        html {
-          scroll-padding-top: ${height}px !important;
-        }
-        main, #__next, .main-content {
-          padding-top: ${height}px !important;
-        }
-      `;
-      
-      // Remover estilo anterior si existe
-      const existingStyle = document.getElementById('navbar-padding-fix');
-      if (existingStyle) {
-        document.head.removeChild(existingStyle);
-      }
-      
-      document.head.appendChild(style);
-      
-      // Método 3: También agregar a posibles contenedores principales
-      const mainElement = document.querySelector('main') || document.querySelector('#__next') || document.body;
-      mainElement.style.paddingTop = `${height}px`;
-    };
-
-    // Ejecutar inmediatamente
-    forcePadding();
-    
-    // Ejecutar después de que todo esté renderizado
-    setTimeout(forcePadding, 100);
-    setTimeout(forcePadding, 500);
-    
-    // También ejecutar en resize
-    window.addEventListener('resize', forcePadding);
-    
-    return () => {
-      window.removeEventListener('resize', forcePadding);
-      const style = document.getElementById('navbar-padding-fix');
-      if (style) {
-        document.head.removeChild(style);
-      }
-      document.body.style.paddingTop = '';
-    };
-  }, []);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      {/* WRAPPER para asegurar que todo funcione */}
-      <div style={{ position: 'relative', zIndex: 9999 }}>
-        <nav 
-          ref={navbarRef}
-          className="navbar"
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            zIndex: 9999,
-          }}
-        >
-          <div className="navbar-container">
-            <a href="#hero" className="navbar-brand">
+      {/* 
+        NAVBAR AJUSTADO (MÁS GRANDE)
+        Mobile: h-24 (96px)
+        Desktop: h-32 (128px) -> Si sigue siendo chico, cambia a h-36 o h-40
+      */}
+      <nav className="fixed top-0 left-0 w-full z-50 bg-black/90 backdrop-blur-md border-b border-white/10 h-24 md:h-32 transition-all duration-300">
+        <div className="w-full h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          
+          {/* LOGO Y MARCA */}
+          <a href="#hero" className="flex items-center gap-5 group h-full py-2">
+            {/* Contenedor del Logo: Controla el tamaño real de la imagen aquí */}
+            <div className="relative w-20 h-20 md:w-28 md:h-28 flex-shrink-0">
               <Image
                 src="/images/logo-lupulos-rio-negro.png"
                 alt="Logo Lúpulos Río Negro"
-                width={140}
-                height={140}
-                className="navbar-logo"
-                priority={true}
+                fill
+                className="object-contain"
+                priority
               />
-              <div className="brand-text-container">
-                <span className="brand-text">Lúpulos Río Negro</span>
-                <span className="brand-subtitle">Patagonia Argentina</span>
-              </div>
-            </a>
+            </div>
+            
+            <div className="flex flex-col justify-center">
+              {/* Texto agrandado */}
+              <span className="text-xl md:text-2xl font-bold text-green-400 leading-tight group-hover:text-green-300 transition-colors">
+                Lúpulos Río Negro
+              </span>
+              <span className="text-sm md:text-base text-gray-300 font-light tracking-wide">
+                Patagonia Argentina
+              </span>
+            </div>
+          </a>
 
-            <ul className="nav-links">
+          {/* ENLACES DE ESCRITORIO */}
+          <ul className="hidden md:flex items-center gap-8 lg:gap-10">
+            {navLinks.map((link) => (
+              <li key={link.name}>
+                <a 
+                  href={link.href}
+                  className="relative text-gray-100 text-lg font-medium py-2 transition-colors hover:text-green-400 group"
+                >
+                  {link.name}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-green-400 transition-all duration-300 ease-out group-hover:w-full"></span>
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          {/* MENÚ HAMBURGUESA (Móvil) */}
+          <button 
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden text-gray-100 focus:outline-none p-2"
+          >
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {isOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+        </div>
+
+        {/* Menú Móvil Desplegable (Opcional pero recomendado) */}
+        {isOpen && (
+          <div className="md:hidden absolute top-full left-0 w-full bg-black/95 border-t border-white/10">
+             <ul className="flex flex-col p-4">
               {navLinks.map((link) => (
                 <li key={link.name}>
-                  <a href={link.href}>{link.name}</a>
+                  <a 
+                    href={link.href} 
+                    className="block py-3 text-gray-100 text-lg hover:text-green-400"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.name}
+                  </a>
                 </li>
               ))}
             </ul>
           </div>
-        </nav>
-        
-        {/* SPACER DIV - Método infalible */}
-        <div 
-          id="navbar-spacer" 
-          style={{
-            height: '80px',
-            display: 'block',
-            width: '100%',
-          }}
-        />
-      </div>
+        )}
+      </nav>
 
-      {/* ESTILOS CON MÁXIMA PRIORIDAD */}
+      {/* 
+        ESPACIADOR (SPACER)
+        Debe tener la MISMA altura que el nav de arriba:
+        h-24 (mobile) y md:h-32 (desktop)
+      */}
+      <div className="h-24 md:h-32 w-full" aria-hidden="true"></div>
+
+      {/* Estilos globales para el scroll */}
       <style jsx global>{`
-        /* !!! ESTILOS GLOBALES CON !important !!! */
-        body, html {
-          padding-top: 80px !important;
-          margin-top: 0 !important;
+        html {
+          scroll-behavior: smooth;
+          /* Padding debe coincidir con las alturas: 6rem = 96px, 8rem = 128px */
+          scroll-padding-top: 6rem; 
         }
-        
-        /* Asegurar que el primer elemento después del navbar tenga margen */
-        body > *:first-child:not(.navbar):not(#navbar-spacer) {
-          margin-top: 10px !important;
-        }
-        
-        /* Estilos específicos para secciones de anclaje */
-        section[id], div[id] {
-          scroll-margin-top: 0px !important;
-        }
-        
-        /* Asegurar que el navbar esté siempre encima */
-        .navbar {
-          position: fixed !important;
-          top: 0 !important;
-          left: 0 !important;
-          width: 100% !important;
-          z-index: 9999 !important;
-          background-color: rgba(0, 0, 0, 0.8) !important;
-        }
-        
-        /* El resto de tus estilos originales */
-        .navbar-container {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 15px 5%;
-        }
-
-        .navbar-brand {
-          display: flex;
-          align-items: center;
-          color: var(--color-text-light);
-          text-decoration: none;
-        }
-
-        .navbar-logo {
-          margin-right: 30px;
-          flex-shrink: 0;
-        }
-
-        .brand-text-container {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          line-height: 1.2;
-        }
-
-        .brand-text {
-          font-size: 1.4em;
-          color: var(--color-accent-green);
-          font-weight: bold;
-          white-space: nowrap;
-        }
-
-        .brand-subtitle {
-          font-size: 0.8em;
-          color: var(--color-text-light);
-          white-space: nowrap;
-        }
-
-        .nav-links {
-          list-style: none;
-          margin: 0;
-          padding: 0;
-          display: flex;
-          gap: 30px;
-        }
-
-        .nav-links a {
-          color: var(--color-text-light);
-          font-size: 1.1em;
-          transition: color 0.3s ease;
-          position: relative;
-        }
-
-        .nav-links a:hover {
-          color: var(--color-accent-green);
-        }
-
-        .nav-links a::after {
-          content: '';
-          position: absolute;
-          width: 0%;
-          height: 2px;
-          bottom: -5px;
-          left: 0;
-          background-color: var(--color-accent-green);
-          transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-          width: 100%;
-        }
-
-        @media (max-width: 768px) {
-          body, html {
-            padding-top: 60px !important;
-          }
-          
-          #navbar-spacer {
-            height: 60px !important;
-          }
-          
-          .navbar-container {
-            justify-content: center;
-            padding: 10px 5%;
-          }
-
-          .navbar-logo {
-            margin-right: 15px;
-            width: 80px;
-            height: 80px;
-          }
-          
-          .brand-text {
-            font-size: 1em;
-          }
-          
-          .brand-subtitle {
-            font-size: 0.6em;
-          }
-
-          .nav-links {
-            display: none;
-          }
-          
-          section[id], div[id] {
-            scroll-margin-top: 60px !important;
+        @media (min-width: 768px) {
+          html {
+            scroll-padding-top: 8rem;
           }
         }
       `}</style>
