@@ -14,7 +14,6 @@ const LOCATION = {
 export default function MapInner() {
   const [customIcon, setCustomIcon] = useState(null);
 
-  // 1. Creamos el icono SOLO cuando el componente se monta en el cliente
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const icon = new L.Icon({
@@ -33,20 +32,18 @@ export default function MapInner() {
     }
   }, []);
 
-  // Si el icono no está listo, no renderizamos el mapa todavía
   if (!customIcon) return null;
 
   return (
     <MapContainer
-      // 2. LA SOLUCIÓN AL ERROR "Map container is being reused":
-      // El 'key' obliga a React a tratar este mapa como una instancia nueva si se vuelve a montar.
-      key="lupulos-map" 
+      key="lupulos-map"
       center={[LOCATION.lat, LOCATION.lng]}
       zoom={14}
       scrollWheelZoom={false}
-      className="w-full h-full z-0 bg-gray-200"
+      // 1. Corrección: Agregar style inline explícito
+      style={{ height: '100%', width: '100%', minHeight: '400px' }} 
+      className="z-0 bg-gray-200"
     >
-      {/* 3. TileLayer es lo que lanzaba el error de 'appendChild' si el mapa no estaba listo */}
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; OpenStreetMap contributors'
