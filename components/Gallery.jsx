@@ -1,194 +1,115 @@
-'use client';
+// components/Gallery.jsx
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
 
-const STRAPI_BASE_URL = process.env.NEXT_PUBLIC_STRAPI_URL;
+const STRAPI_BASE_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
-export default function Gallery() {
-  const [galleryData, setGalleryData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+// Función auxiliar para obtener la mejor URL de imagen disponible
+const getImageUrl = (img) => {
+  if (!img) return null;
+  
+  // Priorizamos formatos optimizados (large o medium) para la galería
+  // para no descargar la imagen original de 20MB si existe una de 1000px
+  const format = img.formats?.large || img.formats?.medium || img.formats?.small;
+  const url = format?.url || img.url;
+  
+  if (!url) return null;
+  return url.startsWith('http') ? url : `${STRAPI_BASE_URL}${url}`;
+};
 
-  useEffect(() => {
-    async function loadGalleryData() {
-      try {
-        // Asegúrate de que el populate trae 'fotos'
-        const apiUrl = `${STRAPI_BASE_URL}/api/galleries?populate=*`;
-        const response = await fetch(apiUrl);
+async function getGalleryData() {
+  try {
+    const apiUrl = `${STRAPI_BASE_URL}/api/galleries?populate=*`;
+    // Cacheamos por 60 segundos
+    const response = await fetch(apiUrl, { next: { revalidate: 60 } });
 
-        if (!response.ok) {
-             console.error(`Error HTTP: ${response.status}`);
-             throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        setGalleryData(data);
-        setError(null);
-      } catch (error) {
-        setError('Error: ' + error.message);
-      } finally {
-        console.log('🏁 Finalizando loading');
-        setLoading(false);
-      }
-    }
-    loadGalleryData();
-  }, []);
-
-  // 1. Tu JSON tiene "data" como un array: [ { id: 2, ... } ]
-  // Seleccionamos el primer elemento (índice 0).
-  const galleryContent = galleryData?.data?.[0];
-
-  // 2. Extraemos las fotos. En tu JSON el campo se llama "fotos" y es un array directo.
-  const galeriaFotos = galleryContent?.fotos || [];
-
-  if (loading) {
-    return (
-      <section id="gallery" className="gallery-section">
-        <div className="gallery-content"><p>Cargando información...</p></div>
-      </section>
-    );
+    if (!response.ok) return null;
+    
+    const json = await response.json();
+    return json.data?.[0] || null;
+  } catch (error) {
+    console.error('Error loading gallery:', error);
+    return null;
   }
+}
 
-  if (error) {
-    return (
-      <section id="gallery" className="gallery-section">
-        <div className="error-message"><p>{error}</p></div>
-      </section>
-    );
-  }
+export default async function Gallery() {
+  const galleryContent = await getGalleryData();
 
+  // Si no hay datos, mostramos un estado vacío elegante
   if (!galleryContent) {
     return (
-      <section id="gallery" className="gallery-section">
-        <div className="gallery-content"><p>No se encontró información.</p></div>
+      <section id="gallery" className="bg-black text-white min-h-[50vh] flex items-center justify-center">
+        <p className="text-gray-500">Galería no disponible momentáneamente.</p>
       </section>
     );
   }
 
+  const galeriaFotos = galleryContent.fotos || [];
+
   return (
-    <section id="gallery" className="gallery-section">
-      <div className="gallery-background-overlay">
+    <section id="gallery" className="relative bg-black text-white py-24 px-4 sm:px-6 lg:px-8 min-h-screen flex flex-col items-center overflow-hidden">
+      
+      {/* --- FONDO --- */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-5">
         <Image
           src="/images/logo-lupulos-rio-negro.png"
-          alt="Lúpulos Río Negro Fondo"
-          fill={true}
-          style={{ objectFit: 'cover', opacity: 0.05 }}
-          sizes="(max-width: 768px) 100vw, 50vw"
+          alt="Fondo decorativo"
+          fill
+          className="object-cover"
+          quality={50}
         />
       </div>
 
-      <h2>Nuestra Chacra en Imágenes</h2>
-      
-      {/* 3. El campo de texto en tu JSON se llama "parrafo" */}
-      {galleryContent?.parrafo ? (
-        <div className="gallery-text">
-          {galleryContent.parrafo.split('\n\n').map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-          ))}
-        </div>
-      ) : (
-        <div className="gallery-text">
-          <p>No hay descripción disponible.</p>
-        </div>
-      )}
-
-      {/* Galería de fotos */}
-      {galeriaFotos.length > 0 ? (
-        <div className="gallery-grid"> 
-          {galeriaFotos.map((image) => {
-            
-            // 4. Lógica de URL basada en tu JSON (las propiedades están en la raíz del objeto image)
-            const imagePath = image.url; 
-            
-            // Concatenar URL base si es relativa (/uploads/...)
-            const imageUrl = imagePath.startsWith('http') 
-                ? imagePath 
-                : `${STRAPI_BASE_URL}${imagePath}`;
-
-            return (
-              <div key={image.id} className="gallery-item"> 
-                <Image
-                  src={imageUrl}
-                  alt={image.alternativeText || image.name || "Imagen de la chacra"}
-                  fill
-                  unoptimized={true}
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="gallery-image"
-                  style={{ objectFit: 'cover' }}
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <p>No hay imágenes disponibles</p>
-      )}
-
-      <style jsx>{`
-        .gallery-section {
-          position: relative;
-          background-color: #000000;
-          color: #ffffff;
-          overflow: hidden;
-          padding: 80px 5%;
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          text-align: center;
-        }
-
-        .gallery-background-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          z-index: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          pointer-events: none;
-        }
-
-        .gallery-section h2,
-        .gallery-text,
-        .gallery-grid {
-          position: relative;
-          z-index: 1;
-        }
+      {/* --- CONTENIDO --- */}
+      <div className="relative z-10 w-full max-w-7xl flex flex-col items-center text-center">
         
-        .gallery-text {
-            margin-bottom: 30px;
-            max-width: 800px;
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
+        <h2 className="text-4xl md:text-5xl font-bold mb-8 text-white drop-shadow-md">
+          Nuestra Chacra en Imágenes
+        </h2>
+        
+        {/* Descripción */}
+        {galleryContent.parrafo && (
+          <div className="max-w-3xl text-lg md:text-xl text-gray-300 mb-12 space-y-4 font-light">
+            {galleryContent.parrafo.split('\n\n').map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
+          </div>
+        )}
 
-        .gallery-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 20px;
-          margin-top: 40px;
-          max-width: 1200px;
-          width: 100%;
-        }
+        {/* GRID DE FOTOS */}
+        {galeriaFotos.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+            {galeriaFotos.map((image) => {
+              const imageUrl = getImageUrl(image);
+              if (!imageUrl) return null;
 
-        .gallery-item {
-          position: relative;
-          height: 300px;
-          overflow: hidden;
-          border-radius: 10px;
-          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-          transition: transform 0.3s ease;
-        }
-
-        .gallery-item:hover {
-          transform: scale(1.03);
-        }
-      `}</style>
+              return (
+                <div 
+                  key={image.id} 
+                  className="group relative h-72 md:h-80 w-full overflow-hidden rounded-xl bg-gray-900 shadow-lg border border-white/10"
+                >
+                  <Image
+                    src={imageUrl}
+                    alt={image.alternativeText || image.name || "Imagen de la chacra"}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    // Eliminamos 'unoptimized' para aprovechar la optimización de Next.js
+                  />
+                  
+                  {/* Overlay al hacer hover */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-10 border border-white/10 rounded-lg">
+            <p className="text-gray-400">No hay imágenes para mostrar.</p>
+          </div>
+        )}
+        
+      </div>
     </section>
   );
 }
