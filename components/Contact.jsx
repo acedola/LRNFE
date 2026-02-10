@@ -50,8 +50,8 @@ export default function Contact() {
     {
       id: 'email',
       name: 'Email',
-      username: 'contacto@lupulosrionegro.com',
-      url: 'mailto:eduardocurutchet@yahoo.com.ar',
+      username: 'Lupulosrionegro@gmail.com',
+      url: 'mailto:Lupulosrionegro@gmail.com',
       color: 'hover:border-orange-500 hover:shadow-orange-500/20',
       iconColor: 'text-orange-500',
       description: 'Escríbenos tu consulta',
