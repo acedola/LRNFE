@@ -8,8 +8,8 @@ export default function Contact() {
     {
       id: 'whatsapp',
       name: 'WhatsApp',
-      username: '+54 9 298 123-4567', // Tu número visible
-      url: 'https://wa.me/5492981234567', // Tu enlace real
+      username: '+54 9 2214 40-9427', // Tu número visible
+      url: 'https://wa.me/5492214409427', // Tu enlace real
       color: 'hover:border-green-500 hover:shadow-green-500/20',
       iconColor: 'text-green-500',
       description: 'Respuesta inmediata',
@@ -23,7 +23,7 @@ export default function Contact() {
       id: 'instagram',
       name: 'Instagram',
       username: '@lupulosrionegro',
-      url: 'https://instagram.com/TUUSUARIO',
+      url: 'https://www.instagram.com/lupulosrionegro/',
       color: 'hover:border-pink-500 hover:shadow-pink-500/20',
       iconColor: 'text-pink-500',
       description: 'Nuestras fotos y novedades',
@@ -37,7 +37,7 @@ export default function Contact() {
       id: 'facebook',
       name: 'Facebook',
       username: 'Lúpulos Río Negro',
-      url: 'https://facebook.com/TUUSUARIO',
+      url: 'https://www.facebook.com/lupulosrionegro/?locale=es_LA',
       color: 'hover:border-blue-500 hover:shadow-blue-500/20',
       iconColor: 'text-blue-500',
       description: 'Síguenos en la comunidad',
@@ -51,7 +51,7 @@ export default function Contact() {
       id: 'email',
       name: 'Email',
       username: 'contacto@lupulosrionegro.com',
-      url: 'mailto:contacto@lupulosrionegro.com',
+      url: 'mailto:eduardocurutchet@yahoo.com.ar',
       color: 'hover:border-orange-500 hover:shadow-orange-500/20',
       iconColor: 'text-orange-500',
       description: 'Escríbenos tu consulta',
