@@ -73,7 +73,7 @@ export default async function About() {
       {/* --- CONTENIDO --- */}
       <div className="relative z-10 w-full max-w-6xl flex flex-col items-center">
         
-        <h2 className="text-4xl md:text-5xl font-bold mb-10 text-center drop-shadow-md border-b-4 border-green-400 pb-2">
+        <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white drop-shadow-md">
           Sobre la Chacra
         </h2>
 
