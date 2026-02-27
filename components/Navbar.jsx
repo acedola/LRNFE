@@ -51,7 +51,7 @@ export default function Navbar() {
               />
             </div>
             <div className="flex flex-col justify-center">
-              <span className="font-bold text-green-400 text-sm md:text-xl leading-tight">
+              <span className="font-bold text-white-400 text-sm md:text-xl leading-tight">
                 Lúpulos Río Negro
               </span>
             </div>
